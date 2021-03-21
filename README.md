@@ -10,6 +10,7 @@ Telegram-bot для учета домашних заданий.
 Программа реализована на языке Python 3 в среде Visual Studio 2019 с использованием Telegram Bot API. В качестве СУБД используется MySQL.
 
 Для запуска программы небходимо получить token у BotFather (чтобы получить доступ к HTTP API).
+Инструкция: https://romua1d.ru/kak-poluchit-token-bota-telegram-api/
 
 Модули программы
 - Server.py - главный модуль программы;
