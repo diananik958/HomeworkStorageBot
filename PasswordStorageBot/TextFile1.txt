@@ -1,0 +1,85 @@
+def registerUser(id, token):
+        cursor = DB.cursor()
+        register = "insert into users (user_id, token, is_auth) values (%s, %s, %s)"
+        values = ('user' + str(id), token, 1)
+        cursor.execute(register, values)
+        DB.commit()
+        cursor.close()      
+
+
+def setToken(id, token):
+        cursor = DB.cursor()
+        query = "update users set token = '" + str(token) + "' where user_id = 'user" + str(id) + "'"
+        cursor.execute(query)
+        DB.commit()
+        cursor.close()
+
+
+def getToken(id):
+        cursor = DB.cursor()
+        query = "select token from users where user_id = 'user" + str(id) + "'"
+        cursor.execute(query)
+        token = cursor.fetchone()
+        cursor.close()
+        return token[0]
+
+def openSession(id):
+        cursor = DB.cursor()
+        query = "update users set is_auth = '1' where user_id = 'user" + str(id) + "'"
+        cursor.execute(query)
+        DB.commit()
+        cursor.close()
+
+def closeSession(id):
+        cursor = DB.cursor()
+        query = "update users set is_auth = '0' where user_id = 'user" + str(id) + "'"
+        cursor.execute(query)
+        DB.commit()
+        cursor.close()
+
+def checkSession(id):
+        cursor = DB.cursor(buffered=True)
+        query = "select is_auth from users where user_id = 'user" + str(id) + "'"
+        cursor.execute(query)
+        session_is_open = cursor.fetchone()
+        cursor.close()
+        return session_is_open[0]
+
+
+#---SIGN UP------------------------------------------------------------------------------------------
+@dp.message_handler(commands=['signup', 'SIGNUP', 'signUp'])
+async def signUp(message: types.Message):
+    try: 
+        Authorization.signup(message.from_user.id)
+        await message.answer("Ok!\nYou are signed up")
+    except AppExceptions.UserAlreadyExist as error:
+        print(error)
+        await message.answer("Looks like you already hane an account.\ntype /help to see the list of all commands and their desrciption")
+    except Exception as e:
+        print(e)
+        await message.answer("Unexpected error!")
+#---SIGN IN------------------------------------------------------------------------------------------
+
+@dp.message_handler(commands=['signin', 'SIGNIN', 'signIn'])
+async def signIn(message: types.Message):
+    token = message.text[8:]
+    print(token)
+    try: 
+        if (Authorization.signin(message.from_user.id, int(token))):
+            await message.answer("You are signed in!")
+        else:
+            await message.answer("Incorrect token")
+    except Exception as e:
+        print(e)
+        await message.answer("error")
+#----SIGN OUT-----------------------------------------------------------------------------------------
+
+@dp.message_handler(commands=['signout', 'SIGNOUT', 'signOut'])
+async def signOut(message: types.Message):
+    try: 
+        new_token = Authorization.signout(message.from_user.id)
+        await message.answer("You are signed out!\nYour new token is " + str(new_token))
+        #сделать удаление сообщения
+    except Exception as e:
+        print(e)
+        await message.answer("error")
